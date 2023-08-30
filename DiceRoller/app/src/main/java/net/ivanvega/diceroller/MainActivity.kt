@@ -29,6 +29,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Preview
+@Composable
+fun DiceRollerApp() {
+
+}
+
+@Composable
+fun DiceWithButtonAndImage() {
+
+}
+
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
