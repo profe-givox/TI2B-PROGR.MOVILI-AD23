@@ -62,18 +62,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EditNumberField(modifier: Modifier = Modifier) {
-    var amountInput  by remember {
-        mutableStateOf("0")
-    }
-
-    val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
-
+fun EditNumberField(
+    perroValue: String,
+    perroOnValueCHange : (String) -> Unit,
+    modifier: Modifier = Modifier) {
 
     TextField(
-        value = amountInput,
-        onValueChange = {cad -> amountInput = cad},
+        value = perroValue,
+        onValueChange = perroOnValueCHange,
         modifier = modifier,
         label = {
             Text(stringResource(R.string.bill_amount))
@@ -81,31 +77,6 @@ fun EditNumberField(modifier: Modifier = Modifier) {
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 
     )
-}
-
-@Composable
-fun TipTimeLayout() {
-    Column(
-        modifier = Modifier.padding(40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(R.string.calculate_tip),
-            modifier = Modifier
-                .padding(bottom = 16.dp)
-                .align(alignment = Alignment.Start)
-        )
-        EditNumberField(modifier = Modifier
-            .padding(bottom = 32.dp)
-            .fillMaxWidth())
-
-        Text(
-            text = stringResource(R.string.tip_amount, "$0.00"),
-            style = MaterialTheme.typography.displaySmall
-        )
-        Spacer(modifier = Modifier.height(150.dp))
-    }
 }
 
 /**
@@ -116,6 +87,41 @@ fun TipTimeLayout() {
 private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
     val tip = tipPercent / 100 * amount
     return NumberFormat.getCurrencyInstance().format(tip)
+}
+
+@Composable
+fun TipTimeLayout() {
+    Column(
+        modifier = Modifier.padding(40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        var amountInput  by remember {
+            mutableStateOf("0")
+        }
+        val amount = amountInput.toDoubleOrNull() ?: 0.0
+        val tip = calculateTip(amount)
+
+        Text(
+            text = stringResource(R.string.calculate_tip),
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .align(alignment = Alignment.Start)
+        )
+        EditNumberField(
+            perroValue = amountInput,
+            perroOnValueCHange = { miperrovalor -> amountInput = miperrovalor }
+            ,modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth())
+
+        Text(
+            text = stringResource(R.string.tip_amount, tip),
+            style = MaterialTheme.typography.displaySmall
+        )
+        Spacer(modifier = Modifier.height(150.dp))
+    }
 }
 
 @Preview(showBackground = true)
