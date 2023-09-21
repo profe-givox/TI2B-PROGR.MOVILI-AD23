@@ -31,11 +31,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -63,15 +68,45 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WoofTopAppBar(modifier: Modifier = Modifier) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_woof_logo), contentDescription = null,
+                    modifier = Modifier
+                        .size(dimensionResource(id = R.dimen.image_size))
+                        .padding(dimensionResource(id = R.dimen.padding_small)),
+                )
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.displayLarge
+                )
+
+            }
+        }
+
+    )
+
+}
+
+
 /**
  * Composable that displays an app bar and a list of dogs.
  */
 @Composable
 fun WoofApp() {
-    LazyColumn {
-        items(dogs) {
-            DogItem(dog = it, modifier =
-        Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
+    Scaffold(topBar = {
+        WoofTopAppBar()
+    }) {
+        LazyColumn (contentPadding = it) {
+            items(dogs) {
+                DogItem(dog = it, modifier =
+            Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
+            }
         }
     }
 }
