@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 private val _uiState = MutableStateFlow(GameUiState())
 data class GameUiState(
    val currentScrambledWord: String = ""
-
-
-
+   ,
+   val isGuessedWordWrong: Boolean = false,
 )
