@@ -80,6 +80,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             userGuess = gameViewModel.userGuess,
             onUserGuessChanged =  { gameViewModel.updateUserGuess(it) },
             onKeyboardDone = { gameViewModel.checkUserGuess() },
+            wordCount = gameUiState.currentWordCount,
             currentScrambledWord = gameUiState.currentScrambledWord,
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,7 +106,8 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             }
 
             OutlinedButton(
-                onClick = { },
+                onClick = { gameViewModel.skipWord() },
+
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -114,8 +116,13 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                 )
             }
         }
-
-        GameStatus(score = 0, modifier = Modifier.padding(20.dp))
+        if (gameUiState.isGameOver) {
+            FinalScoreDialog(
+                score = gameUiState.score,
+                onPlayAgain = { gameViewModel.resetGame() }
+            )
+        }
+        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
     }
 }
 
@@ -138,6 +145,7 @@ fun GameLayout(
     userGuess: String,
     onUserGuessChanged: (String) -> Unit,
     onKeyboardDone: () -> Unit,
+    wordCount: Int,
     currentScrambledWord: String,
     modifier: Modifier = Modifier) {
 
@@ -158,7 +166,7 @@ fun GameLayout(
                     .background(colorScheme.surfaceTint)
                     .padding(horizontal = 10.dp, vertical = 4.dp)
                     .align(alignment = Alignment.End),
-                text = stringResource(R.string.word_count, 0),
+                text = stringResource(R.string.word_count, wordCount),
                 style = typography.titleMedium,
                 color = colorScheme.onPrimary
             )
@@ -182,7 +190,12 @@ fun GameLayout(
                     disabledContainerColor = colorScheme.surface,
                 ),
                 onValueChange = onUserGuessChanged,
-                label = { Text(stringResource(R.string.enter_your_word)) },
+                label = {
+                            if(isGuessWrong)
+                                Text(stringResource(R.string.wrong_guess))
+                            else
+                                Text(stringResource(R.string.enter_your_word))
+                        },
                 isError = isGuessWrong,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
