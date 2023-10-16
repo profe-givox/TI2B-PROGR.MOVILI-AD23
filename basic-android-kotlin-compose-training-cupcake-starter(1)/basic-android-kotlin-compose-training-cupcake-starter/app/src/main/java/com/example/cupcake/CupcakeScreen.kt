@@ -99,14 +99,22 @@ fun CupcakeApp(
             ){
             composable(route = CupcakeScreen.Start.name){
                 StartOrderScreen(quantityOptions = DataSource.quantityOptions,
-                    onNextButtonClicked = {} )
+                    onNextButtonClicked =  {
+                        viewModel.setQuantity(it)
+                        navController.navigate(CupcakeScreen.Flavor.name)
+                    } )
             }
             composable(route = CupcakeScreen.Flavor.name) {
                 val context = LocalContext.current
                 SelectOptionScreen(
                     subtotal = uiState.price,
                     options = flavors.map { id -> stringResource(id) },
-                    onSelectionChanged = { viewModel.setFlavor(it) }
+                    onSelectionChanged = { viewModel.setFlavor(it) },
+                    onCancelButtonClicked = { cancelOrderAndNavigateToStart(viewModel, navController)
+                    },
+                    onNextButtonClicked = {
+                        navController.navigate(CupcakeScreen.Pickup.name)
+                    }
 
                 )
             }
@@ -114,15 +122,38 @@ fun CupcakeApp(
                 SelectOptionScreen(
                     subtotal = uiState.price,
                     options = uiState.pickupOptions,
-                    onSelectionChanged = { viewModel.setDate(it) }
+                    onSelectionChanged = { viewModel.setDate(it) },
+                    onCancelButtonClicked = {
+                        cancelOrderAndNavigateToStart(viewModel, navController)
+                    },
+                    onNextButtonClicked = {
+                         navController.navigate(  CupcakeScreen.Summary.name)
+                    }
                 )
             }
             composable(route = CupcakeScreen.Summary.name) {
                 OrderSummaryScreen(
-                    orderUiState = uiState
+                    orderUiState = uiState,
+                    onCancelButtonClicked = {
+                        cancelOrderAndNavigateToStart(viewModel, navController)
+                    },
+                    onSendButtonClicked = {
+                            st1Subject: String, st2Summary:String ->
+
+                    }
+
                 )
             }
 
         }
     }
+}
+
+private fun cancelOrderAndNavigateToStart(
+    viewModel: OrderViewModel,
+    navController: NavHostController
+) {
+    viewModel.resetOrder()
+    navController.popBackStack(CupcakeScreen.Start.name, inclusive = false)
+
 }
