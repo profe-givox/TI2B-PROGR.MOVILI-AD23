@@ -15,6 +15,8 @@
  */
 package com.example.cupcake
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -35,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cupcake.data.DataSource
 import com.example.cupcake.data.DataSource.flavors
@@ -84,6 +87,12 @@ fun CupcakeApp(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+
+
+
+
     Scaffold(
         topBar = {
             CupcakeAppBar(
@@ -132,6 +141,7 @@ fun CupcakeApp(
                 )
             }
             composable(route = CupcakeScreen.Summary.name) {
+                val ctx = LocalContext.current
                 OrderSummaryScreen(
                     orderUiState = uiState,
                     onCancelButtonClicked = {
@@ -139,6 +149,7 @@ fun CupcakeApp(
                     },
                     onSendButtonClicked = {
                             st1Subject: String, st2Summary:String ->
+                                shareOrder(ctx, st1Subject, st2Summary)
 
                     }
 
@@ -148,6 +159,20 @@ fun CupcakeApp(
         }
     }
 }
+
+private fun shareOrder(context: Context, subject: String, summary: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, summary)
+    }
+    context.startActivity(
+            Intent.createChooser(intent,
+                context.getString(R.string.new_cupcake_order)
+        )
+    )
+}
+
 
 private fun cancelOrderAndNavigateToStart(
     viewModel: OrderViewModel,
