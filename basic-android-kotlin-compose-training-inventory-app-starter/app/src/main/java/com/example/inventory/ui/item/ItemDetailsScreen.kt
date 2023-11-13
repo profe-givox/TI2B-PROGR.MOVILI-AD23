@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -57,6 +58,7 @@ import com.example.inventory.data.Item
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
+import kotlinx.coroutines.launch
 
 object ItemDetailsDestination : NavigationDestination {
     override val route = "item_details"
@@ -73,6 +75,7 @@ fun ItemDetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val uiState = viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -84,7 +87,7 @@ fun ItemDetailsScreen(
             )
         }, floatingActionButton = {
             FloatingActionButton(
-                onClick = { navigateToEditItem(0) },
+                onClick = {  navigateToEditItem(uiState.value.itemDetails.id)  },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
 
@@ -98,8 +101,15 @@ fun ItemDetailsScreen(
     ) { innerPadding ->
         ItemDetailsBody(
             itemDetailsUiState =uiState.value,
-            onSellItem = { },
-            onDelete = { },
+            onSellItem = {
+                viewModel.reduceQuantityByOne()
+            },
+            onDelete = {
+                coroutineScope.launch {
+                    viewModel.deleteItem()
+                    navigateBack()
+                }
+            },
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
@@ -129,7 +139,7 @@ private fun ItemDetailsBody(
             onClick = onSellItem,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
-            enabled = true
+            enabled = !itemDetailsUiState.outOfStock
         ) {
             Text(stringResource(R.string.sell))
         }
@@ -239,7 +249,9 @@ fun ItemDetailsScreenPreview() {
                 outOfStock = true,
                 itemDetails = ItemDetails(1, "Pen", "$100", "10")
             ),
-            onSellItem = {},
+            onSellItem = {
+
+            },
             onDelete = {}
         )
     }
