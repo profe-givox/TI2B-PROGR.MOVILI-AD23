@@ -34,6 +34,14 @@ class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository
 ) : ViewModel() {
+    /**
+     * Holds current item ui state
+     */
+    var itemUiState by mutableStateOf(ItemUiState())
+        private set
+
+    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
+
     init {
         viewModelScope.launch {
             itemUiState = itemsRepository.getItemStream(itemId)
@@ -44,17 +52,22 @@ class ItemEditViewModel(
         }
     }
 
-    /**
-     * Holds current item ui state
-     */
-    var itemUiState by mutableStateOf(ItemUiState())
-        private set
-
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
-
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
         return with(uiState) {
             name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
         }
     }
+    fun updateUiState(itemDetails: ItemDetails) {
+        itemUiState =
+            ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
+    }
+
+    suspend fun updateItem() {
+        if (validateInput(itemUiState.itemDetails)) {
+            itemsRepository.updateItem(itemUiState.itemDetails.toItem())
+        }
+
+    }
+
+
 }
